@@ -21,12 +21,12 @@ export function transform(ast) {
 
   newAst.labels.push({
     type: "VarLabelDeclaration",
-    name: "program",
+    name: "stack",
   });
 
   newAst.labels.push({
     type: "VarLabelDeclaration",
-    name: "stack",
+    name: "out",
   });
 
   newAst.body.push({
@@ -52,7 +52,7 @@ function handleLine(newAst, node) {
   }
 
   if (node.type === "CallExpression") {
-    const outAddress = "program";
+    const outAddress = "out";
     handleCallExpression(newAst, node, outAddress);
 
     return;
@@ -92,38 +92,60 @@ function transformAssignment(newAst, node) {
   }
 }
 
-function loadParamIntoRegister(param, register) {
-  if (param.type === "Identifier") {
-    return {
+function loadParamIntoRegister(newAst, param, register) {
+  if (param.type === "CallExpression") {
+    // handle function calls
+    const outAddress = "stack";
+    handleCallExpression(newAst, param, outAddress);
+    newAst.body.push({
+      type: "LD",
+      reg1: ZERO_REGISTER,
+      address: outAddress,
+      reg2: register,
+    });
+  } else if (param.type === "Identifier") {
+    newAst.body.push({
       type: "LD",
       reg1: ZERO_REGISTER,
       address: param.value,
       reg2: register,
-    };
+    });
   } else if (param.type === "NumberLiteral") {
-    return {
+    newAst.body.push({
       type: "ADDC",
       reg1: ZERO_REGISTER,
       constant: param.value,
       reg2: register,
-    };
+    });
   } else {
     throw new TypeError("Unknown parameter type: " + param.type);
   }
 }
 
+const OP_MAP = {
+  sum: "ADD",
+  sub: "SUB",
+  mul: "MUL",
+  div: "DIV",
+  and: "AND",
+  or: "OR",
+  xor: "XOR",
+  eq: "CMPEQ",
+};
+
 function handleCallExpression(newAst, node, outAddress) {
   // check if the expression is a built-in function
-  if (node.name === "sum") {
+  if (OP_MAP[node.name]) {
     // we know sum has 2 parameters
+    const type = OP_MAP[node.name];
 
     const param1 = node.params[0];
     const param2 = node.params[1];
 
-    newAst.body.push(loadParamIntoRegister(param1, "R1"));
-    newAst.body.push(loadParamIntoRegister(param2, "R2"));
+    loadParamIntoRegister(newAst, param1, "R1");
+    loadParamIntoRegister(newAst, param2, "R2");
     newAst.body.push({
-      type: "ADD",
+      type: type,
       reg1: "R1",
       reg2: "R2",
       reg3: "R3",
@@ -186,8 +208,8 @@ function handleCallExpression(newAst, node, outAddress) {
 }
 
 function handleMoreThan(newAst, param1, param2, outAddress) {
-  newAst.body.push(loadParamIntoRegister(param1, "R1"));
-  newAst.body.push(loadParamIntoRegister(param2, "R2"));
+  loadParamIntoRegister(newAst, param1, "R1");
+  loadParamIntoRegister(newAst, param2, "R2");
   newAst.body.push({
     type: "CMPLE",
     reg1: "R1",

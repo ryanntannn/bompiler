@@ -1,11 +1,11 @@
 int x = 10;
 int y = 20;
 int a = sum(x, y);
-int b = sum(10, 30);
-int c = sum(20, 40);
-x = sum(x, y);
+int b = sub(10, 30);
+int c = mul(20, 40);
+x = div(x, y);
 
-if (moreThan(x, 5)) {
+if (moreThan(x, sum(5, a))) {
 	x = sum(x, 1);
 	if (moreThan(x, 100)) {
 		x = sum(x, 2);
