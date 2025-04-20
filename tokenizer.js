@@ -27,6 +27,15 @@ export function tokenizer(input) {
         case "return":
           tokens.push({ type: "keyword", value });
           break;
+        case "if":
+          tokens.push({ type: "keyword", value });
+          break;
+        case "else":
+          tokens.push({ type: "keyword", value });
+          break;
+        case "while":
+          tokens.push({ type: "keyword", value });
+          break;
         default:
           tokens.push({ type: "name", value });
       }

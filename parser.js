@@ -82,6 +82,113 @@ export function parser(tokens) {
             type: "ReturnStatement",
             value: walk(),
           };
+        case "if":
+          current++;
+          // expect the next token to be a paren
+          let paren = tokens[current];
+          if (paren.type !== "paren" || paren.value !== "(") {
+            throw new TypeError("Expected a paren after if");
+          }
+          current++;
+          // expect the next token to be an expression
+          let test = walk();
+          // expect the next token to be a paren
+          paren = tokens[current];
+          if (paren.type !== "paren" || paren.value !== ")") {
+            throw new TypeError("Expected a paren after if");
+          }
+          current++;
+          // expect the next token to be a block
+          let block = tokens[current];
+          if (block.type !== "brace" || block.value !== "{") {
+            throw new TypeError("Expected a brace after if");
+          }
+          current++;
+          let consequent = [];
+          while (
+            tokens[current].type !== "brace" ||
+            tokens[current].value !== "}"
+          ) {
+            let node = walk();
+            if (node) {
+              consequent.push(node);
+            }
+          }
+          current++;
+          // handle else statement
+          if (
+            tokens[current].type === "keyword" &&
+            tokens[current].value === "else"
+          ) {
+            current++;
+            // expect the next token to be a block
+            block = tokens[current];
+            if (block.type !== "brace" || block.value !== "{") {
+              throw new TypeError("Expected a brace after else");
+            }
+            current++;
+            let alternate = [];
+            while (
+              tokens[current].type !== "brace" ||
+              tokens[current].value !== "}"
+            ) {
+              let node = walk();
+              if (node) {
+                alternate.push(node);
+              }
+            }
+            current++;
+            return {
+              type: "IfStatement",
+              test,
+              consequent,
+              alternate,
+            };
+          } else {
+            return {
+              type: "IfStatement",
+              test,
+              consequent,
+            };
+          }
+        case "while":
+          current++;
+          // expect the next token to be a paren
+          let whileParen = tokens[current];
+          if (whileParen.type !== "paren" || whileParen.value !== "(") {
+            throw new TypeError("Expected a paren after while");
+          }
+          current++;
+          // expect the next token to be an expression
+          let whileTest = walk();
+          // expect the next token to be a paren
+          whileParen = tokens[current];
+          if (whileParen.type !== "paren" || whileParen.value !== ")") {
+            throw new TypeError("Expected a paren after while");
+          }
+          current++;
+          // expect the next token to be a block
+          let whileBlock = tokens[current];
+          if (whileBlock.type !== "brace" || whileBlock.value !== "{") {
+            throw new TypeError("Expected a brace after while");
+          }
+          current++;
+          let whileBody = [];
+          while (
+            tokens[current].type !== "brace" ||
+            tokens[current].value !== "}"
+          ) {
+            let node = walk();
+            if (node) {
+              whileBody.push(node);
+            }
+          }
+          current++;
+          return {
+            type: "WhileStatement",
+            test: whileTest,
+            body: whileBody,
+          };
         default:
           throw new TypeError(
             "I dont know what this keyword is: " + token.value
