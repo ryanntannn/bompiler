@@ -142,20 +142,7 @@ function handleCallExpression(newAst, node, outAddress) {
     const param1 = node.params[0];
     const param2 = node.params[1];
 
-    loadParamIntoRegister(newAst, param1, "R1");
-    loadParamIntoRegister(newAst, param2, "R2");
-    newAst.body.push({
-      type: type,
-      reg1: "R1",
-      reg2: "R2",
-      reg3: "R3",
-    });
-    newAst.body.push({
-      type: "ST",
-      reg1: "R3",
-      address: outAddress,
-      reg2: ZERO_REGISTER,
-    });
+    handleOp(newAst, type, param1, param2, outAddress);
     return;
   }
 
@@ -193,25 +180,39 @@ function handleCallExpression(newAst, node, outAddress) {
   if (node.name === "moreThan") {
     const param1 = node.params[0];
     const param2 = node.params[1];
-    handleMoreThan(newAst, param1, param2, outAddress);
+    handleOp(newAst, "CMPLE", param2, param1, outAddress);
     return;
   }
 
   if (node.name === "lessThan") {
     const param1 = node.params[0];
     const param2 = node.params[1];
-    handleMoreThan(newAst, param2, param1, outAddress);
+    handleOp(newAst, "CMPLT", param1, param2, outAddress);
+    return;
+  }
+
+  if (node.name === "lessThanOrEqual") {
+    const param1 = node.params[0];
+    const param2 = node.params[1];
+    handleOp(newAst, "CMPLE", param1, param2, outAddress);
+    return;
+  }
+
+  if (node.name === "moreThanOrEqual") {
+    const param1 = node.params[0];
+    const param2 = node.params[1];
+    handleOp(newAst, "CMPLT", param2, param1, outAddress);
     return;
   }
 
   throw new TypeError("Unknown function call: " + node.name);
 }
 
-function handleMoreThan(newAst, param1, param2, outAddress) {
-  loadParamIntoRegister(newAst, param1, "R1");
-  loadParamIntoRegister(newAst, param2, "R2");
+function handleOp(newAst, opType, param1Addr, param2Addr, outAddress) {
+  loadParamIntoRegister(newAst, param1Addr, "R1");
+  loadParamIntoRegister(newAst, param2Addr, "R2");
   newAst.body.push({
-    type: "CMPLE",
+    type: opType,
     reg1: "R1",
     reg2: "R2",
     reg3: "R3",
@@ -245,23 +246,22 @@ function handleIfStatement(newAst, node) {
       reg2: "R1",
     });
     newAst.body.push({
-      type: "BEQ",
+      type: "BNE",
       reg1: "R1",
       address: consequentLabel,
       reg2: ZERO_REGISTER,
     });
     if (alternate) {
       newAst.body.push({
-        type: "BNE",
-        reg1: "R1",
+        type: "BR",
         address: alternateLabel,
-        reg2: ZERO_REGISTER,
+      });
+    } else {
+      newAst.body.push({
+        type: "BR",
+        address: endLabel,
       });
     }
-    newAst.body.push({
-      type: "BR",
-      address: endLabel,
-    });
   } else {
     throw new TypeError("Unknown test type: " + test.type);
   }

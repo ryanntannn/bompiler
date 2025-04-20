@@ -18,7 +18,7 @@ if (moreThan(x, sum(5, a))) {
 
 int i = 0;
 
-while (moreThan(i, 6)) {
+while (lessThanOrEqual(i, 6)) {
 	i = sum(i, 1);
 }
 
