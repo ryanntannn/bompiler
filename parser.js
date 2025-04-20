@@ -38,6 +38,15 @@ export function parser(tokens) {
           name: token.value,
           params: args,
         };
+      } else if (tokens[current].type === "assign") {
+        // check for assignment
+        current++;
+        let value = walk();
+        return {
+          type: "AssignmentExpression",
+          name: token.value,
+          value,
+        };
       } else {
         return {
           type: "Identifier",

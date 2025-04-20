@@ -5,9 +5,20 @@ import { transform } from "./transformer.js";
 import fs from "fs";
 
 function compile(input) {
+  console.log("Input: ", input);
+
+  console.log("==========================");
+  console.log("Tokenizing...");
   const tokens = tokenizer(input);
+  console.log("Tokens: ", tokens);
+  console.log("==========================");
+  console.log("Parsing...");
   const ast = parser(tokens);
+  console.log("AST: ", JSON.stringify(ast, null, 2));
+  console.log("==========================");
   const newAst = transform(ast);
+  console.log("Transformed AST: ", newAst);
+  console.log("==========================");
   return codeGenerator(newAst);
 }
 
