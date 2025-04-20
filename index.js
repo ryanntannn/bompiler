@@ -1,0 +1,23 @@
+import { codeGenerator } from "./code-generator.js";
+import { parser } from "./parser.js";
+import { tokenizer } from "./tokenizer.js";
+import { transform } from "./transformer.js";
+import fs from "fs";
+
+function compile(input) {
+  const tokens = tokenizer(input);
+  const ast = parser(tokens);
+  const newAst = transform(ast);
+  return codeGenerator(newAst);
+}
+
+function main() {
+  const inputFile = "input.c";
+  const input = fs.readFileSync(inputFile, "utf8");
+  const result = compile(input);
+  const outputFile = "output.uasm";
+  fs.writeFileSync(outputFile, result);
+  console.log(`File written to ${outputFile}`);
+}
+
+main();

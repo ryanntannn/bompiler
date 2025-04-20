@@ -1,0 +1,13 @@
+{
+  "name": "bsim-compiler",
+  "version": "1.0.0",
+  "description": "a toy compiler from c like code to uasm (MIT BSIM)",
+  "main": "index.js",
+  "scripts": {
+    "compile": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "type": "module",
+  "author": "Ryan Tan",
+  "license": "ISC"
+}
