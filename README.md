@@ -53,4 +53,4 @@ To use the compiler, you need to have node.js installed. You can then run the co
 npm run compile
 ```
 
-To run the beta assembly code, you can execute the
+To run the beta assembly code, you can execute the output.usam file in the given bsim.jar file.
